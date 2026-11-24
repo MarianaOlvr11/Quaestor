@@ -17,3 +17,6 @@ Thumbs.db
 
 # configurações locais do Claude Code
 .claude/
+
+# logs de uso (tokens e custo) gerados localmente
+logs/

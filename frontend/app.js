@@ -71,6 +71,8 @@ function setDrawer(open) {
   $("#scrim").hidden = !open;
 }
 function resetChat() {
+  // nova sessão no servidor: a conversa anterior não é reaproveitada
+  state.sessionId = crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
   chat.innerHTML = "";
   chatInner = null;
   state.perfil = { campos: {}, classificacao: null };
@@ -152,6 +154,7 @@ async function send(text) {
   try {
     res = await callApi(text);
   } catch {
+    // sem backend (site estático): usa o modo demonstração roteirizado
     state.demo = true;
     $("#demoBadge").hidden = false;
     await new Promise((r) => setTimeout(r, 700 + Math.random() * 600));
@@ -159,9 +162,15 @@ async function send(text) {
   }
 
   hideStatus();
-  if (res.perfil) state.perfil = res.perfil;
-  if (res.carteira) state.carteira = res.carteira;
-  addMessage("bot", res.reply, { citations: res.citations, showPanelBtn: res.showPanelBtn });
+  if (res.erro) {
+    // falha real do backend/modelo: avisa, sem inventar resposta
+    addMessage("bot", `Não consegui responder agora (${res.erro}). Sua mensagem não foi registrada; tente enviar de novo em instantes.`);
+  } else {
+    const primeiraCarteira = !state.carteira && !!res.carteira;
+    if (res.perfil) state.perfil = res.perfil;
+    if (res.carteira) state.carteira = res.carteira;
+    addMessage("bot", res.reply, { citations: res.citations, showPanelBtn: res.showPanelBtn ?? primeiraCarteira });
+  }
   renderPanel();
   state.busy = false;
   sendBtn.disabled = false;
@@ -175,7 +184,12 @@ async function callApi(text) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ session_id: state.sessionId, message: text }),
   });
-  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  // 404/405/501: não há backend (ex.: servidor estático) → modo demonstração
+  if ([404, 405, 501].includes(r.status)) throw new Error(`sem backend (HTTP ${r.status})`);
+  if (!r.ok) {
+    const corpo = await r.json().catch(() => ({}));
+    return { erro: corpo.erro || (r.status === 422 ? "mensagem inválida ou longa demais" : `erro ${r.status}`) };
+  }
   return r.json();
 }
 
@@ -342,6 +356,8 @@ const demo = {
 function autosize() {
   input.style.height = "auto";
   input.style.height = Math.min(input.scrollHeight, 160) + "px";
+  // barra de rolagem só quando o texto passa da altura máxima
+  input.style.overflowY = input.scrollHeight > 160 ? "auto" : "hidden";
 }
 input.addEventListener("input", autosize);
 input.addEventListener("keydown", (e) => {
