@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Quaestor</title>
+  <meta name="description" content="Assistente educacional para identificar seu perfil de investidor e simular carteiras.">
+  <meta name="theme-color" content="#f4f4f1">
+  <link rel="icon" type="image/png" href="img/favicon.png">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+  <meta property="og:title" content="Quaestor">
+  <meta property="og:image" content="img/quaestor-icon.webp">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Filtro de refração do "liquid glass" (usado só em Chrome/Edge) -->
+  <svg class="svg-defs" aria-hidden="true" focusable="false">
+    <filter id="lg-refract" x="0%" y="0%" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.006 0.009" numOctaves="2" seed="11" result="noise"/>
+      <feGaussianBlur in="noise" stdDeviation="2.5" result="soft"/>
+      <feDisplacementMap in="SourceGraphic" in2="soft" scale="38" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
+
+  <div class="backdrop" aria-hidden="true"></div>
+
+  <div class="app" id="app" data-view="home">
+    <div class="blobs" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+
+    <!-- ============ SIDEBAR (desktop) / DRAWER (mobile) ============ -->
+    <aside class="sidebar" id="sidebar" aria-label="Navegação">
+      <div class="brand">
+        <img class="brand-logo" src="img/quaestor-icon.webp" alt="" width="48" height="48">
+        <div>
+          <div class="brand-name">Quaestor</div>
+          <div class="brand-sub">Assistente de perfil investidor</div>
+        </div>
+        <button class="icon-btn only-mobile" id="closeDrawer" aria-label="Fechar menu">
+          <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-item active" data-action="new-chat">
+          <span class="ico"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          Nova conversa
+        </button>
+        <button class="nav-item" data-action="open-panel">
+          <span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.2-3.6 3.8-5.5 7-5.5s5.8 1.9 7 5.5"/></svg></span>
+          Meu perfil
+        </button>
+        <button class="nav-item" data-action="open-panel">
+          <span class="ico"><svg viewBox="0 0 24 24"><path d="M21 12A9 9 0 1 1 12 3v9z"/><path d="M15.5 3.7a9 9 0 0 1 4.8 4.8h-4.8z"/></svg></span>
+          Carteira simulada
+        </button>
+        <button class="nav-item" data-action="about">
+          <span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg></span>
+          Como funciona
+        </button>
+      </nav>
+
+      <div class="sidebar-coin coin-wrap" aria-hidden="true"><img class="coin" src="img/quaestor-coin.webp" alt=""></div>
+
+      <div class="sidebar-foot">
+        <div class="model-chip" title="Modelo usado pelo assistente">
+          <img class="gico xs" src="icons/zap.svg" alt="">
+          <span class="model-text"><small>Powered by</small>Claude Haiku 5.5</span>
+        </div>
+      </div>
+    </aside>
+    <div class="scrim" id="scrim" hidden></div>
+
+    <!-- ============ MAIN ============ -->
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-btn only-mobile" id="openDrawer" aria-label="Abrir menu">
+          <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+        </button>
+        <div class="topbar-brand only-mobile">
+          <img class="brand-logo sm" src="img/quaestor-icon.webp" alt="" width="40" height="40">
+          <div>
+            <div class="brand-name sm">Quaestor</div>
+            <div class="brand-sub">Bem-vindo(a) de volta</div>
+          </div>
+        </div>
+        <span class="demo-badge" id="demoBadge" hidden>Modo demonstração</span>
+        <div class="topbar-actions">
+          <button class="pill-btn chat-only" id="newChatTop" aria-label="Encerrar conversa">
+            <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>
+            <span>Encerrar conversa</span>
+          </button>
+          <button class="icon-btn" id="togglePanel" aria-label="Ver perfil e carteira" aria-controls="panel">
+            <svg viewBox="0 0 24 24"><path d="M21 12A9 9 0 1 1 12 3v9z"/><path d="M15.5 3.7a9 9 0 0 1 4.8 4.8h-4.8z"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- HOME -->
+      <section class="home" id="home">
+        <div class="hero-coin coin-wrap only-mobile" aria-hidden="true"><img class="coin" src="img/quaestor-coin.webp" alt=""></div>
+        <h1 class="hero-title">
+          Qual é o seu<br><span class="grad">perfil de investidor?</span>
+        </h1>
+        <p class="hero-sub">Converse comigo, entenda sua classificação e monte uma carteira simulada — sem usar dinheiro real.</p>
+
+        <div class="suggestions" role="list">
+          <button class="suggestion" role="listitem" data-prompt="Quero descobrir meu perfil de investidor.">
+            <img class="gico" src="icons/compass.svg" alt="">
+            <span>Descobrir meu perfil</span>
+          </button>
+          <button class="suggestion" role="listitem" data-prompt="Monte uma carteira simulada para mim.">
+            <img class="gico" src="icons/chart-pie.svg" alt="">
+            <span>Montar carteira simulada</span>
+          </button>
+          <button class="suggestion" role="listitem" data-prompt="O que é liquidez?">
+            <img class="gico" src="icons/droplet.svg" alt="">
+            <span>O que é liquidez?</span>
+          </button>
+          <button class="suggestion" role="listitem" data-prompt="Qual a diferença entre renda fixa e renda variável?">
+            <img class="gico" src="icons/arrow-up-down.svg" alt="">
+            <span>Renda fixa × variável</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- CHAT -->
+      <section class="chat" id="chat" aria-live="polite" aria-label="Conversa"></section>
+
+      <!-- COMPOSER -->
+      <form class="composer" id="composer" autocomplete="off">
+        <label class="sr-only" for="input">Mensagem</label>
+        <textarea id="input" rows="1" placeholder="Pergunte algo ou conte sobre seus objetivos…" maxlength="1200"></textarea>
+        <button class="send-btn" type="submit" id="sendBtn" aria-label="Enviar">
+          <svg viewBox="0 0 24 24"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/></svg>
+        </button>
+      </form>
+    </main>
+
+    <!-- ============ PERFIL + CARTEIRA ============ -->
+    <aside class="panel" id="panel" aria-label="Perfil e carteira">
+      <div class="panel-handle only-mobile" aria-hidden="true"></div>
+      <div class="panel-head">
+        <h2>
+          <img class="gico sm" src="icons/user.svg" alt="">
+          Seu perfil
+        </h2>
+        <button class="icon-btn" id="closePanel" aria-label="Fechar painel">
+          <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+
+      <div class="card profile-card">
+        <div class="profile-result">
+          <span class="profile-label">Classificação</span>
+          <span class="profile-value" id="profileValue">Em análise…</span>
+        </div>
+        <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+        <ul class="fields" id="fields"></ul>
+      </div>
+
+      <h2 class="panel-sub">
+        <img class="gico sm" src="icons/wallet.svg" alt="">
+        Carteira simulada
+      </h2>
+      <div class="card" id="portfolioCard">
+        <p class="empty" id="portfolioEmpty">A carteira aparece aqui depois que o perfil for definido.</p>
+        <div class="donut-wrap" id="donutWrap" hidden>
+          <svg class="donut" viewBox="0 0 42 42" id="donut" role="img" aria-label="Distribuição da carteira"></svg>
+          <div class="donut-center"><strong>100%</strong><span>alocado</span></div>
+        </div>
+        <ul class="alloc" id="alloc"></ul>
+      </div>
+
+      <div class="card blocked" id="blockedCard" hidden>
+        <h3>
+          <img class="gico sm" src="icons/shield-x.svg" alt="">
+          Bloqueados pelas regras
+        </h3>
+        <ul id="blocked"></ul>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Como funciona -->
+  <dialog class="modal" id="aboutModal">
+    <div class="modal-head">
+      <img class="brand-logo" src="img/quaestor-icon.webp" alt="" width="56" height="56">
+      <div>
+        <h2>Como o Quaestor funciona</h2>
+        <p class="muted">Na Roma antiga, o <em>quaestor</em> era o magistrado que cuidava das finanças públicas — daí o nome.</p>
+      </div>
+    </div>
+    <ol>
+      <li>Você conversa com o assistente (Claude Haiku 5.5), que coleta seus objetivos, prazo, experiência e tolerância a perdas.</li>
+      <li>A <strong>classificação final</strong> e o <strong>bloqueio de produtos</strong> são feitos por regras programadas — o modelo não pode liberar um produto incompatível.</li>
+      <li>As explicações usam uma base de conteúdo revisada (CVM, ANBIMA, Tesouro Direto, FGC, Banco Central), com a fonte indicada.</li>
+    </ol>
+    <p class="muted">Projeto acadêmico — IFSP Pirituba. Não é recomendação de investimento. Não informe CPF, senhas ou dados bancários.</p>
+    <form method="dialog"><button class="pill-btn primary">Entendi</button></form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>

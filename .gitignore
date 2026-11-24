@@ -1,0 +1,19 @@
+# segredos — nunca publicar a chave da API
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# sistema / editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# configurações locais do Claude Code
+.claude/
