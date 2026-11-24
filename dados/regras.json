@@ -1,0 +1,128 @@
+{
+  "versao": "0.1",
+  "status": "rascunho - números a ajustar pelo grupo e congelar antes dos testes",
+  "base_normativa": {
+    "norma": "Resolução CVM nº 30/2021 (texto consolidado)",
+    "url": "https://conteudo.cvm.gov.br/legislacao/resolucoes/resol030.html",
+    "acesso": "2026-11-24",
+    "resumo": "A norma exige verificar objetivos de investimento, situação financeira e conhecimento do cliente (art. 3º), classificar o cliente em categorias de perfil de risco (art. 4º), classificar os produtos (art. 5º) e não recomendar produto inadequado ou sem informações suficientes (art. 6º). A norma não define pontuações nem limites numéricos: cada instituição define sua própria metodologia."
+  },
+
+  "criterios": [
+    {
+      "id": "objetivo",
+      "nome": "Objetivo do investimento",
+      "base": "Res. CVM 30, art. 3º, § 1º, III (finalidades do investimento)",
+      "opcoes": [
+        { "valor": "reserva", "rotulo": "reserva de emergência ou uso no curto prazo", "pontos": 1 },
+        { "valor": "objetivo_definido", "rotulo": "objetivo definido (imóvel, estudo, viagem, carro)", "pontos": 2 },
+        { "valor": "crescimento", "rotulo": "crescimento do patrimônio ou aposentadoria", "pontos": 3 }
+      ]
+    },
+    {
+      "id": "horizonte",
+      "nome": "Horizonte de investimento",
+      "base": "Res. CVM 30, art. 3º, § 1º, I (período em que deseja manter o investimento)",
+      "opcoes": [
+        { "valor": "ate_1_ano", "rotulo": "até 1 ano", "pontos": 1, "meses_max": 12 },
+        { "valor": "1_a_5_anos", "rotulo": "de 1 a 5 anos", "pontos": 2, "meses_max": 60 },
+        { "valor": "mais_de_5_anos", "rotulo": "mais de 5 anos", "pontos": 3, "meses_max": 999 }
+      ]
+    },
+    {
+      "id": "experiencia",
+      "nome": "Experiência com investimentos",
+      "base": "Res. CVM 30, art. 3º, § 3º, I e II (produtos com que tem familiaridade e operações já realizadas)",
+      "opcoes": [
+        { "valor": "nenhuma", "rotulo": "nunca investiu ou só poupança", "pontos": 1 },
+        { "valor": "renda_fixa", "rotulo": "já investiu em renda fixa", "pontos": 2 },
+        { "valor": "renda_variavel", "rotulo": "já investiu em renda variável", "pontos": 3 }
+      ]
+    },
+    {
+      "id": "liquidez",
+      "nome": "Necessidade de liquidez",
+      "base": "Res. CVM 30, art. 3º, § 2º, III (necessidade futura de recursos)",
+      "opcoes": [
+        { "valor": "alta", "rotulo": "pode precisar do dinheiro a qualquer momento", "pontos": 1 },
+        { "valor": "media", "rotulo": "pode precisar de parte do dinheiro", "pontos": 2 },
+        { "valor": "baixa", "rotulo": "não deve precisar do dinheiro no período", "pontos": 3 }
+      ]
+    },
+    {
+      "id": "perdas",
+      "nome": "Capacidade de suportar perdas",
+      "base": "Res. CVM 30, art. 3º, § 2º, I e II (receitas regulares e patrimônio)",
+      "opcoes": [
+        { "valor": "baixa", "rotulo": "uma perda afetaria despesas essenciais", "pontos": 1 },
+        { "valor": "media", "rotulo": "uma perda incomodaria, mas não afetaria o essencial", "pontos": 2 },
+        { "valor": "alta", "rotulo": "uma perda temporária não afetaria a vida financeira", "pontos": 3 }
+      ]
+    },
+    {
+      "id": "tolerancia",
+      "nome": "Tolerância ao risco",
+      "base": "Res. CVM 30, art. 3º, § 1º, II (preferências declaradas quanto à assunção de riscos)",
+      "opcoes": [
+        { "valor": "resgataria", "rotulo": "diante de uma queda de 15%, resgataria tudo", "pontos": 1 },
+        { "valor": "esperaria", "rotulo": "diante de uma queda de 15%, esperaria a recuperação", "pontos": 2 },
+        { "valor": "investiria_mais", "rotulo": "diante de uma queda de 15%, investiria mais", "pontos": 3 }
+      ]
+    }
+  ],
+
+  "faixas": [
+    { "perfil": "conservador", "min": 6, "max": 10 },
+    { "perfil": "moderado", "min": 11, "max": 14 },
+    { "perfil": "arrojado", "min": 15, "max": 18 }
+  ],
+
+  "ordem_perfis": ["conservador", "moderado", "arrojado"],
+
+  "travas": [
+    { "id": "horizonte_curto", "campo": "horizonte", "valores": ["ate_1_ano"], "perfil_maximo": "conservador",
+      "motivo": "Com horizonte de até 1 ano, não há tempo para recuperar eventuais quedas de investimentos mais arriscados." },
+    { "id": "liquidez_alta", "campo": "liquidez", "valores": ["alta"], "perfil_maximo": "conservador",
+      "motivo": "Quem pode precisar do dinheiro a qualquer momento não deve depender de investimentos que oscilam ou têm carência." },
+    { "id": "objetivo_reserva", "campo": "objetivo", "valores": ["reserva"], "perfil_maximo": "conservador",
+      "motivo": "A reserva de emergência deve priorizar baixo risco e alta liquidez, não rentabilidade." },
+    { "id": "perdas_baixa", "campo": "perdas", "valores": ["baixa"], "perfil_maximo": "moderado",
+      "motivo": "Quando uma perda afetaria despesas essenciais, o perfil arrojado não é adequado, mesmo com alta tolerância ao risco." },
+    { "id": "sem_experiencia", "campo": "experiencia", "valores": ["nenhuma"], "perfil_maximo": "moderado",
+      "motivo": "Sem experiência prévia, o perfil arrojado exigiria conhecimento que o investidor ainda não declarou ter (art. 3º, III)." }
+  ],
+
+  "escala_risco": {
+    "1": "muito baixo: liquidez diária, baixa oscilação e garantia do Tesouro Nacional ou do FGC",
+    "2": "baixo: renda fixa com carência, pequena oscilação ou sem cobertura do FGC",
+    "3": "médio: oscilação relevante de preço (marcação a mercado) ou estratégias mistas",
+    "4": "alto: renda variável diversificada ou crédito privado sem garantia",
+    "5": "muito alto: renda variável concentrada em empresas individuais"
+  },
+
+  "limites_perfil": {
+    "conservador": { "risco_maximo": 2, "renda_variavel_max_pct": 0 },
+    "moderado": { "risco_maximo": 4, "renda_variavel_max_pct": 30 },
+    "arrojado": { "risco_maximo": 5, "renda_variavel_max_pct": 70 }
+  },
+
+  "carteiras_modelo": {
+    "reserva": { "tesouro-selic": 60, "cdb-liquidez-diaria": 40 },
+    "conservador": { "tesouro-selic": 40, "cdb-liquidez-diaria": 25, "lci": 15, "lca": 10, "tesouro-prefixado": 10 },
+    "moderado": { "tesouro-selic": 25, "cdb-liquidez-diaria": 10, "tesouro-ipca": 25, "lca": 10, "fundo-multimercado": 15, "etf-acoes": 15 },
+    "arrojado": { "tesouro-selic": 10, "tesouro-ipca": 20, "fundo-multimercado": 15, "etf-acoes": 25, "fundo-imobiliario": 15, "acoes": 15 }
+  },
+
+  "destino_redistribuicao": "tesouro-selic",
+
+  "motivos_bloqueio": [
+    { "id": "informacoes_incompletas", "mensagem": "Ainda faltam informações para identificar seu perfil. Sem elas, o Quaestor não monta carteira nem indica produtos (Res. CVM 30, art. 6º, II).", "base": "Res. CVM 30, art. 6º, II" },
+    { "id": "risco_acima_do_perfil", "mensagem": "O risco deste produto é maior que o permitido para o seu perfil.", "base": "Res. CVM 30, art. 6º, I" },
+    { "id": "horizonte_insuficiente", "mensagem": "O prazo de carência ou o horizonte recomendado deste produto é maior que o seu horizonte de investimento.", "base": "Res. CVM 30, art. 5º, IV (prazos de carência)" },
+    { "id": "liquidez_incompativel", "mensagem": "Você indicou que pode precisar do dinheiro a qualquer momento, e este produto tem carência ou oscila de preço.", "base": "Res. CVM 30, art. 3º, § 2º, III (necessidade futura de recursos)" },
+    { "id": "nao_apto_reserva", "mensagem": "Para reserva de emergência, o Quaestor só usa produtos de liquidez diária e baixo risco.", "base": "Base de conteúdo: reserva-emergencia" },
+    { "id": "limite_renda_variavel", "mensagem": "A carteira já atingiu o limite de renda variável do seu perfil.", "base": "Regra própria do Quaestor" },
+    { "id": "fora_do_catalogo", "mensagem": "Este produto não faz parte do catálogo revisado do simulador.", "base": "Regra própria do Quaestor" },
+    { "id": "pedido_ignorar_regras", "mensagem": "As regras de adequação não podem ser desativadas pela conversa. Se suas informações mudaram, você pode revisar suas respostas e o perfil será recalculado.", "base": "Regra própria do Quaestor" }
+  ]
+}
